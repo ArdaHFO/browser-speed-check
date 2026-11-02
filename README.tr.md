@@ -1,4 +1,6 @@
-<h1 align="center">Speedtest-1</h1>
+Bu proje, bir web tarayıcısının indirme, yükleme ve bağlantı gecikmesini nasıl ölçtüğünü araştırır.
+
+<h1 align="center">Browser Network Lab</h1>
 
 <p align="center"><strong>Aktarımı izle. Zamanlamayı anla.</strong></p>
 <p align="center">Tarayıcı tarafında indirme, yükleme ve HTTP gidiş-dönüş sürelerini inceleyen eğitsel Flask ve JavaScript prototipi.</p>
@@ -12,9 +14,9 @@
 
 ---
 
-Speedtest-1, zamanlama mantığını tarayıcıda çalıştırır. JavaScript istekleri başlatır, geçen süreyi kaydeder ve aktarım boyutu ile süre alanlarını gösterir. Flask ise sayfayı ve küçük bir uç nokta grubunu sunar.
+Browser Network Lab, zamanlama mantığını tarayıcıda çalıştırır. JavaScript istekleri başlatır, geçen süreyi kaydeder ve aktarım boyutu ile süre alanlarını gösterir. Flask ise sayfayı ve küçük bir uç nokta grubunu sunar.
 
-**Bu, tamamlanmamış bir ders prototipidir ve doğrulanmış bant genişliği ölçüm aracı değildir.** İlk proje belgesi Kasım 2023 tarihli teslim süresini kaydeder. Önceki README aynı adı kullansa da bu repo, [speedtestFinal](https://github.com/ArdaHFO/speedtestFinal) projesinden ayrı bir uygulamadır.
+**Bu, bir ders prototipidir ve doğrulanmış bant genişliği ölçüm aracı değildir.** İlk proje belgesi Kasım 2023 tarihli teslim süresini kaydeder. Ayrı bir proje olan [Network Transfer Lab](https://github.com/ArdaHFO/network-transfer-lab), tarayıcı arayüzünün yanında sunucu tarafındaki aktarımları inceler.
 
 ## Yerel arayüzü çalıştır
 
@@ -25,8 +27,8 @@ Speedtest-1, zamanlama mantığını tarayıcıda çalıştırır. JavaScript is
 | JavaScript destekli tarayıcı | İstek zamanlaması ve sonuç gösterimi |
 
 ```text
-git clone https://github.com/ArdaHFO/speedtest-1.git
-cd speedtest-1
+git clone https://github.com/ArdaHFO/browser-network-lab.git
+cd browser-network-lab
 python -m venv .venv
 ```
 
@@ -37,7 +39,7 @@ python -m pip install Flask==3.0.0
 python -m flask --app app run --host 127.0.0.1 --port 8000
 ```
 
-[localhost:8000](http://127.0.0.1:8000) adresini aç. CLI, betikteki tüm ağ arayüzlerini dinleyen 80 numaralı port ve debug ayarlarını kullanmadan yerel önizleme başlatır. Sayfa incelenebilir, ancak aktarım kontrollerinde aşağıdaki sınırlamalar vardır.
+[localhost:8000](http://127.0.0.1:8000) adresini aç. CLI, 8000 numaralı portta yerel önizleme başlatır. Uygulamanın ana başlatıcısı da debug kapalı ve yalnızca yerel erişimle çalışacak şekilde tanımlıdır.
 
 Bu sürümün uygulama kodu yalnızca Flask'ı içe aktarır. [requirements.txt](requirements.txt), uygulama dosyalarının çağırmadığı speedtest-cli dahil daha geniş bir geçmiş ortam kaydını korur.
 
@@ -46,15 +48,15 @@ Bu sürümün uygulama kodu yalnızca Flask'ı içe aktarır. [requirements.txt]
 - **Tarayıcıda zamanlama.** İndirme ve yükleme kontrolleri XMLHttpRequest ile tarayıcıda geçen süreyi kullanır.
 - **Aktarım boyutu gösterimi.** Biçimlendirme işlevi, boyutları sonuçların yanında okunabilir birimlere dönüştürür.
 - **HTTP gidiş-dönüş süresi.** `GET /ping`, istek süresi deneyi için `Pong` yanıtını verir.
-- **Küçük Flask yapısı.** Ana sayfa, alternatif `/views/` sayfası ve tamamlanmamış yükleme işleyicisi bulunur.
+- **Küçük Flask yapısı.** Ana sayfa, alternatif `/views/` sayfası ve bayt sayan yükleme işleyicisi bulunur.
 - **Yerel örnek dosyalar.** Geliştirme için görseller ve statik aktarım dosyaları yer alır.
 
 ## Deneyin işleyişi
 
 | Arayüz eylemi | İstek | Mevcut kaynak davranışı |
 | --- | --- | --- |
-| İndir | `GET static/100MB.png` | İstenen dosya yok |
-| Yükle | `POST /upload` | Sunucu rotası yalnızca GET kabul eder |
+| İndir | `GET /download` | Paketlenmiş `20MB.png` dosyasını önbelleksiz sunar |
+| Yükle | `POST /upload` | Uygulama dosyası kaydetmeden alınan bayt sayısını döndürür |
 | Ping | `GET /ping` | Kısa HTTP yanıtı döndürür |
 | Yenile | Sayfa yenileme | Sayfayı sıfırlar |
 
@@ -62,20 +64,20 @@ HTTP gidiş-dönüş süresi, tarayıcıdan uygulamaya gecikmeyi ölçer. Ağ ak
 
 ## Doğrulama ve mevcut sınırlar
 
-Kaynak dosyaları, rota tanımları, şablon istekleri ve repodaki örnek dosyalar incelendi. Aktarım ölçümü veya çalışma zamanı entegrasyon testi yapılmadı.
+Kaynak statik olarak incelendi. Bu değişiklikler için uygulama, otomatik test, aktarım ölçümü veya performans deneyi çalıştırılmadı.
 
-- Şablon `static/100MB.png` dosyasını ister. Repodaki statik dosyalar ise `static/20MB.png` ve `static/100MB.zip` şeklindedir. Dosya adı, gerçek aktarım boyutunu kanıtlamaz.
-- Yükleme işleyicisinde `request` içe aktarılmaz, tarayıcının gönderdiği POST yöntemi kabul edilmez ve repoda bulunmayan `uploads/` klasörü beklenir.
-- Süre dönüşüm sabitleri ve bayttan bite dönüşüm, gösterilen Mbps birimleriyle tutarlı değildir. İndirme hesabı varsayılan boyut ve yanıt metninin uzunluğunu da kullanır.
-- Tarayıcı, hesaplamadan önce HTTP durumunu denetlemediğinden hata yanıtından sonra da sonuç gösterebilir.
-- Önceki belgelerdeki genel IP adresi, Python beta sürümü ve 20 MB verimlilik iddiası tarihsel notlardır. Güncel dağıtım veya ölçüm güvencesi değildir.
+- İndirme zamanlaması paketlenmiş `20MB.png` dosyasının gerçek bayt boyutunu kullanır. Hesaplar geçen saniyeyi ve ondalık Mbps dönüşümünü temel alır. Başarısız HTTP yanıtları sonuç olarak gösterilmez.
+- Yükleme ucu POST kabul eder, dosyanın varlığını denetler ve alınan bayt sayısını doğrular. Multipart ek yükü dahil toplam istek 32 MiB ile sınırlıdır. Uygulama dosyası kaydedilmez.
+- İndirme ve ping yanıtlarında önbellekleme kapatılır. İstek zaman aşımları ve tarayıcı hata mesajları kodda yer alır, ancak çalıştırılarak doğrulanmadı.
+- Ölçümler tarayıcı ile Flask arasındaki yolu tanımlar. Localhost kullanıldığında internet sağlayıcısının hızını değil, yerel aktarımı inceler.
+- Tarayıcı süresi HTTP ve uygulama ek yükünü de içerir. Doğruluk ve tekrarlanabilirlik kontrollü ölçümler gerektirir.
 
-Anlamlı ölçümler için önce bu yolların düzeltilmesi ve aritmetiğin doğrulanması gerekir. Gelecekteki ölçümler gerçek bayt sayısını, geçen saniyeyi, önbellek koşullarını ve tekrarları belirtmelidir.
+Tarihsel genel IP adresleri ve eski dosya boyutu verimliliği iddiaları güncel dağıtım veya ölçüm güvencesi değildir.
 
 ## Proje yapısı
 
 ```text
-app.py                 Flask sayfası, ping ve eksik yükleme rotası
+app.py                 Flask sayfası, indirme, yükleme ve ping rotaları
 views.py               Alternatif sayfa rotası
 templates/index.html   Tarayıcı zamanlaması ve boyut biçimlendirici
 static/                Mevcut aktarım örnekleri
@@ -90,4 +92,3 @@ Değişiklikleri tek bir ölçüm yoluna odakla. Hata bildirimine istenen URL'yi
 ## Lisans ve kaynaklar
 
 [MIT lisansı](LICENSE) ile dağıtılır. Python, Flask ve tanımlanan bağımlılıklar kendi lisanslarına tabidir.
-

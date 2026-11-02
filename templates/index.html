@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
  <meta charset="UTF-8">
@@ -15,7 +15,7 @@
    text-decoration: none;
    margin: 4px 2px;
    cursor: pointer;
-   border-radius: 10px;sends the request to the ser
+   border-radius: 10px;
    width:240px;
   }
   input[type="file"] {
@@ -44,38 +44,38 @@
  <!-- ******************************************************************** -->
  <!-- Download procedure begins here -->
  <!-- ******************************************************************** -->
- <button onclick="measureDownloadSpeed()" style="font-family: 'Arial', monospace; font-size: 14px; 
- background-color: royalblue; border: none; color: white; padding: 16px 32px; 
+ <button onclick="measureDownloadSpeed()" style="font-family: 'Arial', monospace; font-size: 14px;
+ background-color: royalblue; border: none; color: white; padding: 16px 32px;
  text-decoration: none; margin: 4px 2px; cursor: pointer; border-radius: 10px; width: 250px;">Measure Download Speed</button>
  <div style="font-family: 'Arial', monospace; font-size: 14px;height:20px;" id="downloadResult"></div>
  <div style="font-family: 'Arial', monospace; font-size: 14px;height:20px;" id="downloadFileSize"></div>
  <script>
   function measureDownloadSpeed() {
-   var startTime, endTime; //Start and end time variables are defined
-   var downloadSizeInBytes = 1024 * 1024 ; // 1 MB dosya
-   var downloadUrl = "static/100MB.png";// İndirilecek dosyanın URL'si
-   var xhr = new XMLHttpRequest();//Request is defined
-   xhr.open('GET', downloadUrl, true);//Trigger the request to open
-
-   xhr.onreadystatechange = function () {//We check the status of the request's respond if it returns 2(which is request started) request is ready. If it returns 4 (request is ready) we end timer to get the value for calculating speed.
-    
-    if (xhr.readyState === 2) {
-     startTime = new Date().getTime();
-    } else if (xhr.readyState === 4) {
-     endTime = new Date().getTime();
-     var durationInSeconds = (endTime - startTime) / 1000000; //calculations
-     var downloadSpeedMbps = (downloadSizeInBytes / (1024 * 1024 )) / durationInSeconds; //calculations
-     document.getElementById("downloadResult").innerHTML = "Download Speed : " + downloadSpeedMbps.toFixed(2) + " Mbps"; //print operations
-     downloadFileSize = xhr.response.length; //We put the value of file size (as byte) into variable
-     downloadFileSize=formatFileSize(downloadFileSize,2)//we apply formatFileSize function here (detailly explained in line 138)
-     document.getElementById("downloadFileSize").innerHTML = "Download File Size : " + downloadFileSize ;//print operations
-    }
-   };
-  
-   xhr.send();//sends a request to server
+    const xhr = new XMLHttpRequest();
+    const report = message => { document.getElementById('downloadResult').textContent = message; };
+    xhr.open('GET', '/download', true);
+    xhr.responseType = 'blob';
+    xhr.timeout = 60000;
+    const started = performance.now();
+    xhr.onload = () => {
+      if (xhr.status < 200 || xhr.status >= 300) {
+        report('Download failed (HTTP ' + xhr.status + ').');
+        return;
+      }
+      const seconds = (performance.now() - started) / 1000;
+      const bytes = xhr.response.size;
+      if (seconds <= 0 || bytes === 0) {
+        report('The download duration or payload could not be measured.');
+        return;
+      }
+      report('Download Speed: ' + (bytes * 8 / seconds / 1000000).toFixed(2) + ' Mbps');
+      const sizeOutput = document.getElementById('downloadFileSize');
+      if (sizeOutput) sizeOutput.textContent = 'Download File Size: ' + bytes + ' bytes';
+    };
+    xhr.onerror = () => report('Download failed. Check the connection.');
+    xhr.ontimeout = () => report('Download timed out.');
+    xhr.send();
   }
-
-
  </script>
  <!-- ******************************************************************** -->
  <p></p>
@@ -87,31 +87,43 @@
  <div style="font-family: 'Arial', monospace; font-size: 14px;height:20px;" id="uploadFileSize"></div>
  <script>
   function measureUploadSpeed() {
-   var startTime = new Date().getTime();//start time
-   var fileInput = document.getElementById("fileInput");//selection of file for upload operation
-   var file = fileInput.files[0];//selected file into varible
-
-   var formData = new FormData();//Variable decleration to store file
-   formData.append("file", file);//Put the file into variable
-
-   var xhr = new XMLHttpRequest();//New request object decleration
-   xhr.open("POST", "/upload", true);//Trigger the request to open
-
-   xhr.onreadystatechange = function () { //We check the status of the request's respond 
-    if (xhr.readyState === XMLHttpRequest.DONE) {//If request is completed
-     var endTime = new Date().getTime();//end time
-     var duration = endTime - startTime;//duration calculations
-     var uploadSpeedMbps = (file.size / (1024 * 1024)) / (duration / 10000);//calculations
-     document.getElementById("uploadResult").innerHTML = "Upload Speed : " + uploadSpeedMbps.toFixed(2) + " Mbps";//print operations
-    
-     uploadFileSize = file.size; //We put the value of file size (as byte) into variable
-     uploadFileSize=formatFileSize(uploadFileSize,2)//we apply formatFileSize function here (detailly explained in line 138)
-     document.getElementById("uploadFileSize").innerHTML = "Upload File Size : " + uploadFileSize ;//print operations
-    
+    const file = document.getElementById('fileInput').files[0];
+    const report = message => {
+      document.getElementById('uploadResult').textContent = message;
+    };
+    if (!file) return;
+    if (file.size === 0) {
+      report('Choose a nonempty file.');
+      return;
     }
-   };
-
-   xhr.send(formData);//sends a request to serve
+    const formData = new FormData();
+    formData.append('file', file);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/upload', true);
+    xhr.responseType = 'json';
+    xhr.timeout = 60000;
+    const started = performance.now();
+    xhr.onload = () => {
+      if (xhr.status < 200 || xhr.status >= 300) {
+        report('Upload failed (HTTP ' + xhr.status + ').');
+        return;
+      }
+      if (!xhr.response || xhr.response.bytes_received !== file.size) {
+        report('The server did not confirm the complete file.');
+        return;
+      }
+      const seconds = (performance.now() - started) / 1000;
+      if (seconds <= 0) {
+        report('The upload duration could not be measured.');
+        return;
+      }
+      report('Upload Speed: ' + (file.size * 8 / seconds / 1000000).toFixed(2) + ' Mbps');
+      const sizeOutput = document.getElementById('uploadFileSize');
+      if (sizeOutput) sizeOutput.textContent = 'Upload File Size: ' + file.size + ' bytes';
+    };
+    xhr.onerror = () => report('Upload failed. Check the connection.');
+    xhr.ontimeout = () => report('Upload timed out.');
+    xhr.send(formData);
   }
  </script>
  <!-- ******************************************************************** -->
@@ -119,20 +131,26 @@
   <button onclick="pingServer();" style="font-family: 'Arial', monospace; font-size: 14px; background-color: royalblue; border: none; color: white; padding: 16px 32px; text-decoration: none; margin: 4px 2px; cursor: pointer; border-radius: 10px; width: 250px;">Ping to the Server</button>
   <div style="font-family: 'Arial', monospace; font-size: 14px; height:20px;" id="pingResult"></div>
   <script>
-   function pingServer() {// to calculate ping we calculate the time of request
-    var startTime = new Date().getTime();//start time
-    var xhr = new XMLHttpRequest();//New request object decleration
-    xhr.onreadystatechange = function () {
-     if (xhr.readyState === XMLHttpRequest.DONE) {//if request is completed
-      var endTime = new Date().getTime();//end time
-      var duration = endTime - startTime;//calculations
-      document.getElementById("pingResult").innerHTML = "Ping Speed : " + duration + " ms";//print operations
-     }
+  function pingServer() {
+    const xhr = new XMLHttpRequest();
+    const report = message => {
+      document.getElementById('pingResult').textContent = message;
     };
-    xhr.open("GET", "/ping", true);//start the request
-    xhr.send();//sends a request to serve
-   }
-  </script>
+    xhr.open('GET', '/ping', true);
+    xhr.timeout = 10000;
+    const started = performance.now();
+    xhr.onload = () => {
+      if (xhr.status < 200 || xhr.status >= 300 || xhr.responseText !== 'Pong') {
+        report('HTTP timing request failed.');
+        return;
+      }
+      report('HTTP round trip: ' + (performance.now() - started).toFixed(1) + ' ms');
+    };
+    xhr.onerror = () => report('HTTP timing request failed.');
+    xhr.ontimeout = () => report('HTTP timing request timed out.');
+    xhr.send();
+  }
+ </script>
 
 <script>
 function formatFileSize(bytes,decimalPoint) {//Turn byte input file sizes into unit metric

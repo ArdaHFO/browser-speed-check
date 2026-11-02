@@ -1,4 +1,6 @@
-<h1 align="center">Speedtest-1</h1>
+This project explores how a web browser measures downloads, uploads and connection delays.
+
+<h1 align="center">Browser Network Lab</h1>
 
 <p align="center"><strong>Trace a transfer. Understand the timing.</strong></p>
 <p align="center">An educational Flask and JavaScript prototype for browser-side download, upload and HTTP round-trip timing.</p>
@@ -12,9 +14,9 @@
 
 ---
 
-Speedtest-1 places the timing logic in the browser. JavaScript starts requests, records elapsed time and displays transfer-size and timing fields, while Flask serves the page and a small set of endpoints.
+Browser Network Lab places the timing logic in the browser. JavaScript starts requests, records elapsed time and displays transfer-size and timing fields, while Flask serves the page and a small set of endpoints.
 
-**This is an incomplete coursework prototype, not a validated bandwidth benchmark.** The original project documentation records a November 2023 deadline. This repository is a separate implementation from [speedtestFinal](https://github.com/ArdaHFO/speedtestFinal), despite the older README using that name.
+**This is a coursework prototype, not a validated bandwidth benchmark.** The original project documentation records a November 2023 deadline. The separate [Network Transfer Lab](https://github.com/ArdaHFO/network-transfer-lab) explores server-side transfers alongside a browser interface.
 
 ## Run the local interface
 
@@ -25,8 +27,8 @@ Speedtest-1 places the timing logic in the browser. JavaScript starts requests, 
 | Browser with JavaScript | Request timing and result display |
 
 ```text
-git clone https://github.com/ArdaHFO/speedtest-1.git
-cd speedtest-1
+git clone https://github.com/ArdaHFO/browser-network-lab.git
+cd browser-network-lab
 python -m venv .venv
 ```
 
@@ -37,7 +39,7 @@ python -m pip install Flask==3.0.0
 python -m flask --app app run --host 127.0.0.1 --port 8000
 ```
 
-Open [localhost:8000](http://127.0.0.1:8000). The CLI starts a local preview without using the script's all-interface, port-80 debug launch settings. The page can be inspected, but its transfer controls have the limitations below.
+Open [localhost:8000](http://127.0.0.1:8000). The CLI starts a local preview on port 8000. The application entry point also defaults to local access with debug mode disabled.
 
 Only Flask is imported by this variant. [requirements.txt](requirements.txt) preserves a broader historical environment, including speedtest-cli, which these application files do not call.
 
@@ -46,15 +48,15 @@ Only Flask is imported by this variant. [requirements.txt](requirements.txt) pre
 - **Browser-side timing.** Download and upload controls use XMLHttpRequest and elapsed browser time.
 - **Transfer-size display.** A formatter converts sizes into readable units alongside the results.
 - **HTTP round trip.** `GET /ping` returns `Pong` for a request-duration experiment.
-- **Small Flask surface.** The app provides the main page, an alternate `/views/` page and an unfinished upload handler.
+- **Small Flask surface.** The app provides the main page, an alternate `/views/` page and a byte-counting upload handler.
 - **Local fixtures.** The repository includes image files and static transfer assets for development.
 
 ## How the experiment is organized
 
 | UI action | Request | Current source behavior |
 | --- | --- | --- |
-| Download | `GET static/100MB.png` | Referenced file is absent |
-| Upload | `POST /upload` | Backend route accepts GET only |
+| Download | `GET /download` | Serves the bundled `20MB.png` without caching |
+| Upload | `POST /upload` | Returns the received byte count without saving an application file |
 | Ping | `GET /ping` | Returns a short HTTP response |
 | Refresh | Page reload | Resets the page |
 
@@ -62,20 +64,20 @@ An HTTP round trip measures browser-to-application latency. It includes more tha
 
 ## Validation and current limits
 
-The source files, route declarations, template requests and repository fixtures were inspected. No transfer benchmarks or runtime integration tests were run.
+The source has been reviewed statically. No application execution, automated tests, transfer measurements or benchmarks were performed for these changes.
 
-- The template references `static/100MB.png`, but the tracked static assets are `static/20MB.png` and `static/100MB.zip`. A filename is not proof of the actual transfer size.
-- The upload handler does not import `request`, does not accept the POST method used by the browser, and expects an `uploads/` directory that is not included.
-- Time conversion constants and byte-to-bit conversion are inconsistent with the displayed Mbps labels. The download path also uses an assumed size and response-string length.
-- The browser can display a result after an HTTP error because it does not validate response status before calculating.
-- The old public IP, Python beta version and 20 MB efficiency claim in earlier documentation are historical notes, not current deployment or benchmark guarantees.
+- Download timing uses the actual byte size of the bundled `20MB.png`. Rates use elapsed seconds and decimal Mbps, and failed HTTP responses are not presented as results.
+- The upload endpoint accepts POST, checks that a file is present and confirms the received byte count. Total request size is limited to 32 MiB including multipart overhead. No application file is saved.
+- Download and ping responses disable caching. Request timeouts and browser error messages are implemented, but their behavior has not been verified by execution.
+- Measurements describe the browser-to-Flask path. On localhost this is a local transfer, not an internet-provider speed test.
+- Browser timing includes HTTP/application overhead. Accuracy and repeatability still require controlled measurements.
 
-Correcting these paths and validating the arithmetic are prerequisites for meaningful measurements. A future benchmark should report actual byte counts, elapsed seconds, caching conditions and repeat runs.
+Historical public IP addresses and old payload-efficiency claims are not current deployment or benchmark guarantees.
 
 ## Project map
 
 ```text
-app.py                 Flask page, ping and unfinished upload route
+app.py                 Flask page, download, upload and ping routes
 views.py               Alternate page route
 templates/index.html   Browser timing logic and size formatter
 static/                Existing transfer fixtures
@@ -90,4 +92,3 @@ Keep changes focused on one measurement path. Include the requested URL, HTTP st
 ## License and credits
 
 Distributed under the [MIT license](LICENSE). Python, Flask and the declared dependencies retain their respective licenses.
-
