@@ -1,9 +1,9 @@
-Bu proje, bir web tarayıcısının indirme, yükleme ve bağlantı gecikmesini nasıl ölçtüğünü araştırır.
+Bu uygulama, tarayıcınız ile uygulamanın sunucusu arasındaki tahmini indirme ve yükleme hızlarını gösterir.
 
-<h1 align="center">Browser Network Lab</h1>
+<h1 align="center">Browser Speed Check</h1>
 
 <p align="center"><strong>Aktarımı izle. Zamanlamayı anla.</strong></p>
-<p align="center">Tarayıcı tarafında indirme, yükleme ve HTTP gidiş-dönüş sürelerini inceleyen eğitsel Flask ve JavaScript prototipi.</p>
+<p align="center">Tarayıcı tarafında indirme, yükleme ve HTTP gidiş-dönüş sürelerini ölçen Flask ve JavaScript uygulaması.</p>
 
 <p align="center">
   <a href="README.md">English</a> · <strong>Türkçe</strong><br />
@@ -14,9 +14,9 @@ Bu proje, bir web tarayıcısının indirme, yükleme ve bağlantı gecikmesini 
 
 ---
 
-Browser Network Lab, zamanlama mantığını tarayıcıda çalıştırır. JavaScript istekleri başlatır, geçen süreyi kaydeder ve aktarım boyutu ile süre alanlarını gösterir. Flask ise sayfayı ve küçük bir uç nokta grubunu sunar.
+Browser Speed Check, zamanlama mantığını tarayıcıda çalıştırır. JavaScript istekleri başlatır, geçen süreyi kaydeder ve aktarım boyutu ile süre alanlarını gösterir. Flask ise sayfayı ve küçük bir uç nokta grubunu sunar.
 
-**Bu, bir ders prototipidir ve doğrulanmış bant genişliği ölçüm aracı değildir.** İlk proje belgesi Kasım 2023 tarihli teslim süresini kaydeder. Ayrı bir proje olan [Network Transfer Lab](https://github.com/ArdaHFO/network-transfer-lab), tarayıcı arayüzünün yanında sunucu tarafındaki aktarımları inceler.
+**Ölçüm doğruluğu henüz doğrulanmadı.** Ayrı bir proje olan [Network Transfer Check](https://github.com/ArdaHFO/network-transfer-check), tarayıcı arayüzünün yanında sunucu tarafındaki aktarımları inceler.
 
 ## Yerel arayüzü çalıştır
 
@@ -27,8 +27,8 @@ Browser Network Lab, zamanlama mantığını tarayıcıda çalıştırır. JavaS
 | JavaScript destekli tarayıcı | İstek zamanlaması ve sonuç gösterimi |
 
 ```text
-git clone https://github.com/ArdaHFO/browser-network-lab.git
-cd browser-network-lab
+git clone https://github.com/ArdaHFO/browser-speed-check.git
+cd browser-speed-check
 python -m venv .venv
 ```
 
@@ -47,11 +47,11 @@ Bu sürümün uygulama kodu yalnızca Flask'ı içe aktarır. [requirements.txt]
 
 - **Tarayıcıda zamanlama.** İndirme ve yükleme kontrolleri XMLHttpRequest ile tarayıcıda geçen süreyi kullanır.
 - **Aktarım boyutu gösterimi.** Biçimlendirme işlevi, boyutları sonuçların yanında okunabilir birimlere dönüştürür.
-- **HTTP gidiş-dönüş süresi.** `GET /ping`, istek süresi deneyi için `Pong` yanıtını verir.
+- **HTTP gidiş-dönüş süresi.** `GET /ping`, istek süresi ölçümü için `Pong` yanıtını verir.
 - **Küçük Flask yapısı.** Ana sayfa, alternatif `/views/` sayfası ve bayt sayan yükleme işleyicisi bulunur.
 - **Yerel örnek dosyalar.** Geliştirme için görseller ve statik aktarım dosyaları yer alır.
 
-## Deneyin işleyişi
+## Uygulamanın işleyişi
 
 | Arayüz eylemi | İstek | Mevcut kaynak davranışı |
 | --- | --- | --- |
@@ -81,7 +81,7 @@ app.py                 Flask sayfası, indirme, yükleme ve ping rotaları
 views.py               Alternatif sayfa rotası
 templates/index.html   Tarayıcı zamanlaması ve boyut biçimlendirici
 static/                Mevcut aktarım örnekleri
-image/                 Ek görsel ve HTML deneyi
+image/                 Ek görsel ve HTML sayfası
 requirements.txt       Geçmiş bağımlılık kaydı
 ```
 

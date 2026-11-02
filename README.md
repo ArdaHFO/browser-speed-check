@@ -1,9 +1,9 @@
-This project explores how a web browser measures downloads, uploads and connection delays.
+This app shows estimated download and upload speeds between your browser and the app's server.
 
-<h1 align="center">Browser Network Lab</h1>
+<h1 align="center">Browser Speed Check</h1>
 
 <p align="center"><strong>Trace a transfer. Understand the timing.</strong></p>
-<p align="center">An educational Flask and JavaScript prototype for browser-side download, upload and HTTP round-trip timing.</p>
+<p align="center">A Flask and JavaScript application for browser-side download, upload and HTTP round-trip timing.</p>
 
 <p align="center">
   <strong>English</strong> · <a href="README.tr.md">Türkçe</a><br />
@@ -14,9 +14,9 @@ This project explores how a web browser measures downloads, uploads and connecti
 
 ---
 
-Browser Network Lab places the timing logic in the browser. JavaScript starts requests, records elapsed time and displays transfer-size and timing fields, while Flask serves the page and a small set of endpoints.
+Browser Speed Check places the timing logic in the browser. JavaScript starts requests, records elapsed time and displays transfer-size and timing fields, while Flask serves the page and a small set of endpoints.
 
-**This is a coursework prototype, not a validated bandwidth benchmark.** The original project documentation records a November 2023 deadline. The separate [Network Transfer Lab](https://github.com/ArdaHFO/network-transfer-lab) explores server-side transfers alongside a browser interface.
+**Measurement accuracy has not been validated.** The separate [Network Transfer Check](https://github.com/ArdaHFO/network-transfer-check) explores server-side transfers alongside a browser interface.
 
 ## Run the local interface
 
@@ -27,8 +27,8 @@ Browser Network Lab places the timing logic in the browser. JavaScript starts re
 | Browser with JavaScript | Request timing and result display |
 
 ```text
-git clone https://github.com/ArdaHFO/browser-network-lab.git
-cd browser-network-lab
+git clone https://github.com/ArdaHFO/browser-speed-check.git
+cd browser-speed-check
 python -m venv .venv
 ```
 
@@ -47,11 +47,11 @@ Only Flask is imported by this variant. [requirements.txt](requirements.txt) pre
 
 - **Browser-side timing.** Download and upload controls use XMLHttpRequest and elapsed browser time.
 - **Transfer-size display.** A formatter converts sizes into readable units alongside the results.
-- **HTTP round trip.** `GET /ping` returns `Pong` for a request-duration experiment.
+- **HTTP round trip.** `GET /ping` returns `Pong` for request-duration measurement.
 - **Small Flask surface.** The app provides the main page, an alternate `/views/` page and a byte-counting upload handler.
 - **Local fixtures.** The repository includes image files and static transfer assets for development.
 
-## How the experiment is organized
+## How the application works
 
 | UI action | Request | Current source behavior |
 | --- | --- | --- |
@@ -81,7 +81,7 @@ app.py                 Flask page, download, upload and ping routes
 views.py               Alternate page route
 templates/index.html   Browser timing logic and size formatter
 static/                Existing transfer fixtures
-image/                 Additional image fixture and HTML experiment
+image/                 Additional image fixture and HTML page
 requirements.txt       Historical dependency snapshot
 ```
 
